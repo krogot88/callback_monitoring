@@ -9,16 +9,17 @@ import ru.krogot88.callback_monitoring.model.Monitor;
 @Service
 public class MonitorServiceImpl implements MonitorService {
 
+
     @Autowired
     private Monitor monitor;
 
     @Override
     public void addNewCall(Call call) {
-
+        monitor.addNewCall(call);
     }
 
     @Override
     public Alarm getAlarm() {
-        return null;
+        return monitor.getAlarm();
     }
 }

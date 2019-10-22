@@ -4,14 +4,12 @@ import java.time.LocalDateTime;
 
 public class Alarm {
 
-    private enum AlarmStatus {
-        ON,
-        OFF
-    }
     private AlarmStatus alarmStatus;
     private LocalDateTime alarmEstimate;
 
     public Alarm() {
+        alarmStatus = AlarmStatus.OFF;
+        alarmEstimate = null;
     }
 
     public AlarmStatus getAlarmStatus() {

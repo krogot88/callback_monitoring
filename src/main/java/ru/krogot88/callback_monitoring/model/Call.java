@@ -1,6 +1,7 @@
 package ru.krogot88.callback_monitoring.model;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Call {
     private LocalDateTime localDateTime;
@@ -17,6 +18,16 @@ public class Call {
     public Call(LocalDateTime localDateTime, String aNumber) {
         this.localDateTime = localDateTime;
         this.aNumber = aNumber;
+    }
+
+    @Override
+    public String toString() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss");
+        return "Call{" +
+                "Time=" + dtf.format(localDateTime) +
+                ", A='" + aNumber + '\'' +
+                ", B='" + bNumber + '\'' +
+                '}';
     }
 
     public LocalDateTime getLocalDateTime() {
