@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ru"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Alarm</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+</head>
+<body>
+<audio id="player" src="/audio/one.mp3" loop></audio>
+<span>Звонки на ТП, статус : </span>
+<span class="alarm_span green"></span>
+<span id="button_alarm_off" hidden="true"><button onclick="stopMusic()">откл. звук</button></span>
+</body>
+<script th:src="@{/js/alarm.js}"></script>
+<script th:src="@{/js/jQuery341.js}"></script>
+</html>

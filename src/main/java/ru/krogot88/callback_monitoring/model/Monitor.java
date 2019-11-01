@@ -36,7 +36,6 @@ public class Monitor {
     private void performAnalitics() {
         LocalDateTime now = limitedQueue.getLast().getLocalDateTime();
         LocalDateTime start = now.minusMinutes(backTimeMinutes);
-        LocalDateTime currentCall = now;
         int callsInPeriod = 0;
 
         Iterator<Call> it = limitedQueue.descendingIterator();
@@ -45,24 +44,30 @@ public class Monitor {
         }
 
         if (callsInPeriod >= callsThreshold) {
-            alarm.setAlarmStatus(AlarmStatus.ON);
-            alarm.setAlarmEstimate(now.plusMinutes(estimateTimeMinutes));
-            System.out.println("Alarm ON");
-
-
-            thread = new Thread(new Runnable() {
-                @Override
-                public void run(){
-                    try {
-                        TimeUnit.SECONDS.sleep(estimateTimeMinutes);
-                        alarm.setAlarmStatus(AlarmStatus.OFF);
-                        alarm.setAlarmEstimate(null);
-                    } catch (InterruptedException ex) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
-            });
-            thread.start();
+            activateAlarm(now);
         }
+    }
+
+    private void activateAlarm(LocalDateTime newCallTime) {
+        alarm.setAlarmStatus(AlarmStatus.ON);
+        alarm.setAlarmEstimate(newCallTime.plusMinutes(estimateTimeMinutes));
+        System.out.println("Alarm ON");
+
+        if(thread != null && thread.isAlive()) {
+            thread.interrupt();
+        }
+        thread = new Thread(new Runnable() {
+            @Override
+            public void run(){
+                try {
+                    TimeUnit.MINUTES.sleep(estimateTimeMinutes);
+                    alarm.setAlarmStatus(AlarmStatus.OFF);
+                    alarm.setAlarmEstimate(null);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        });
+        thread.start();
     }
 }

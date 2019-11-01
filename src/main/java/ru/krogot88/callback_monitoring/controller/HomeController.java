@@ -39,7 +39,12 @@ public class HomeController {
         monitorService.addNewCall(call);
     }
 
-    @GetMapping(value = "getAlarm")
+    @GetMapping(value = "/")
+    public String getIndex() {
+        return "index";
+    }
+
+    @GetMapping(value = "/alarm")
     public ResponseEntity<Alarm> getAlarm() {
         return new ResponseEntity<>(monitorService.getAlarm(),HttpStatus.OK);
     }
