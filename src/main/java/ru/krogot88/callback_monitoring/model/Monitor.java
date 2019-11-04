@@ -1,25 +1,33 @@
 package ru.krogot88.callback_monitoring.model;
 
 
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.MessageSource;
+import org.springframework.stereotype.Component;
 import ru.krogot88.callback_monitoring.util.LimitedQueue;
 
 import java.time.LocalDateTime;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+@Component
 public class Monitor {
-    private LimitedQueue<Call> limitedQueue;
-    private int backTimeMinutes;
-    private int estimateTimeMinutes;
-    private int callsThreshold;
-    private Alarm alarm;
-    private Thread thread;
 
-    public Monitor() {
-        limitedQueue = new LimitedQueue<>(5);
-        backTimeMinutes = 2;
-        estimateTimeMinutes = 1;
-        callsThreshold = 3;
+    private MessageSource ms;
+    private LimitedQueue<Call> limitedQueue;
+    private int minutesBackward;
+    private int minutesForward;
+    private int[] callsThresholdArray;
+    private Alarm alarm;
+    private Thread alarmTimer;
+
+    public Monitor(@Qualifier("customMessageSource") MessageSource ms) {
+        this.ms = ms;
+        limitedQueue = new LimitedQueue<>(Integer.valueOf(ms.getMessage("limitedqueue.size",null, Locale.getDefault())));
+        minutesBackward = Integer.valueOf(ms.getMessage("alarm.backward.minutes",null, Locale.getDefault()));
+        minutesForward = Integer.valueOf(ms.getMessage("alarm.forward.minutes",null, Locale.getDefault()));
+        callsThresholdArray = getCallsThresholdArray(ms.getMessage("call.threshold.hour",null, Locale.getDefault()));
         alarm = new Alarm();
     }
 
@@ -35,32 +43,34 @@ public class Monitor {
 
     private void performAnalitics() {
         LocalDateTime now = limitedQueue.getLast().getLocalDateTime();
-        LocalDateTime start = now.minusMinutes(backTimeMinutes);
+        LocalDateTime start = now.minusMinutes(minutesBackward);
+        int currentCallsThreshold = callsThresholdArray[now.getHour()];
+        System.out.println(currentCallsThreshold);
         int callsInPeriod = 0;
 
         Iterator<Call> it = limitedQueue.descendingIterator();
-        while(it.hasNext() && start.compareTo(it.next().getLocalDateTime()) < 0 && callsInPeriod < callsThreshold) {
+        while(it.hasNext() && start.compareTo(it.next().getLocalDateTime()) < 0 && callsInPeriod < currentCallsThreshold) {
             callsInPeriod++;
         }
 
-        if (callsInPeriod >= callsThreshold) {
+        if (callsInPeriod >= currentCallsThreshold) {
             activateAlarm(now);
         }
     }
 
-    private void activateAlarm(LocalDateTime newCallTime) {
+    private void activateAlarm(LocalDateTime lastCallTime) {
         alarm.setAlarmStatus(AlarmStatus.ON);
-        alarm.setAlarmEstimate(newCallTime.plusMinutes(estimateTimeMinutes));
+        alarm.setAlarmEstimate(lastCallTime.plusMinutes(minutesForward));
         System.out.println("Alarm ON");
 
-        if(thread != null && thread.isAlive()) {
-            thread.interrupt();
+        if(alarmTimer != null && alarmTimer.isAlive()) {
+            alarmTimer.interrupt();
         }
-        thread = new Thread(new Runnable() {
+        alarmTimer = new Thread(new Runnable() {
             @Override
             public void run(){
                 try {
-                    TimeUnit.MINUTES.sleep(estimateTimeMinutes);
+                    TimeUnit.MINUTES.sleep(minutesForward);
                     alarm.setAlarmStatus(AlarmStatus.OFF);
                     alarm.setAlarmEstimate(null);
                 } catch (InterruptedException ex) {
@@ -68,6 +78,16 @@ public class Monitor {
                 }
             }
         });
-        thread.start();
+        alarmTimer.start();
+    }
+
+    private static int[] getCallsThresholdArray(String callsThresholdArrayString) {
+        String[] stringArr = callsThresholdArrayString.split(";");
+        int[] result = new int[24];
+        for(int i = 0; i < result.length;i++) {
+            String[] subArr = stringArr[i].split("=");
+            result[i]=Integer.valueOf(subArr[1]);
+        }
+        return result;
     }
 }
