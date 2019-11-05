@@ -1,5 +1,27 @@
+var globalDuration = 30;
+var displayAlarm = document.getElementById("timer");
+var alarmStatus = false;
+
 window.onload = function () {
     checkAlarm();
+}
+
+function startTimer(duration, display) {
+    var timer = duration, minutes, seconds;
+    var intervalID = setInterval(function () {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        display.textContent = minutes + ":" + seconds;
+
+        if (--timer < 0) {
+            checkAlarm();
+            clearInterval(intervalID);
+        }
+    }, 1000);
 }
 
 function checkAlarm() {
@@ -12,33 +34,36 @@ function checkAlarm() {
             var status = data.alarmStatus;
             $(".alarm_span").text(status);
             if(status == "ON") {
-                activateAlarm(data.alarmEstimate);
+                activateAlarm(data.duration);
+                startTimer(globalDuration, displayAlarm);
             } else {
-                timer();
+                deactivateAlarm();
+                startTimer(globalDuration, displayAlarm);
             }
         }
     });
 }
 
-function activateAlarm(alarmEstimate) {
-    $(".alarm_span").toggleClass("red");
+function activateAlarm(alarmEstimateSeconds) {
+    if(alarmStatus == false)
+        $(".alarm_span").toggleClass("red");
     document.getElementById('player').play();
     document.getElementById("button_alarm_off").hidden = false;
-    //document.getElementById('player').volume+=0.1
-    //document.getElementById('player').volume-=0.1
-    setTimeout(function () {
+    globalDuration = alarmEstimateSeconds;
+    alarmStatus = true;
+}
+
+function deactivateAlarm() {
+    if(alarmStatus == true) {
         $(".alarm_span").toggleClass("red");
         document.getElementById('player').pause();
         document.getElementById("button_alarm_off").hidden = true;
-        checkAlarm();
-    },70000);
+        globalDuration = 30;
+        alarmStatus = false;
+    }
 }
 
 function stopMusic() {
     document.getElementById('player').pause();
     document.getElementById("button_alarm_off").hidden = true;
-}
-
-function timer() {
-    setTimeout(checkAlarm,30000);
 }

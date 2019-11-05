@@ -8,10 +8,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import ru.krogot88.callback_monitoring.model.Alarm;
+import ru.krogot88.callback_monitoring.model.AlarmDTO;
 import ru.krogot88.callback_monitoring.model.Call;
 import ru.krogot88.callback_monitoring.service.MonitorService;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 
 @Controller
@@ -45,7 +48,14 @@ public class HomeController {
     }
 
     @GetMapping(value = "/alarm")
-    public ResponseEntity<Alarm> getAlarm() {
-        return new ResponseEntity<>(monitorService.getAlarm(),HttpStatus.OK);
+    public ResponseEntity<AlarmDTO> getAlarm() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime alarmEstimate = now;
+        if(monitorService.getAlarm().getAlarmEstimate() != null) {
+            alarmEstimate = monitorService.getAlarm().getAlarmEstimate();
+        }
+        Duration duration = Duration.between(now,alarmEstimate);
+        AlarmDTO alarmDTO = new AlarmDTO(monitorService.getAlarm().getAlarmStatus().toString(),duration.getSeconds());
+        return new ResponseEntity<>(alarmDTO,HttpStatus.OK);
     }
 }
