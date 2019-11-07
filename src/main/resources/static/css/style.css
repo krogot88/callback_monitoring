@@ -1,7 +1,12 @@
-.green {
+#green {
     background: #37d412;
 }
 
-.red {
+#red {
     background: #ff2e31;
 }
+
+#orange {
+    background: #c59c27;
+}
+

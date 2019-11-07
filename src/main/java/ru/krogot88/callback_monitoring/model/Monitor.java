@@ -33,7 +33,7 @@ public class Monitor {
 
     public void addNewCall(Call call) {
         limitedQueue.add(call);
-        System.out.println(limitedQueue);
+        //System.out.println(limitedQueue);  - bug on overflow queue toString method
         performAnalitics();
     }
 
@@ -45,13 +45,14 @@ public class Monitor {
         LocalDateTime now = limitedQueue.getLast().getLocalDateTime();
         LocalDateTime start = now.minusMinutes(minutesBackward);
         int currentCallsThreshold = callsThresholdArray[now.getHour()];
-        System.out.println(currentCallsThreshold);
         int callsInPeriod = 0;
 
         Iterator<Call> it = limitedQueue.descendingIterator();
         while(it.hasNext() && start.compareTo(it.next().getLocalDateTime()) < 0 && callsInPeriod < currentCallsThreshold) {
             callsInPeriod++;
         }
+
+        System.out.println("Threshold: " + currentCallsThreshold + "; calls last: " + callsInPeriod);
 
         if (callsInPeriod >= currentCallsThreshold) {
             activateAlarm(now);

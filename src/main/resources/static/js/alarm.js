@@ -40,13 +40,17 @@ function checkAlarm() {
                 deactivateAlarm();
                 startTimer(globalDuration, displayAlarm);
             }
+        },
+        error: function(request, status, err) {
+                serverTimeout();
+                startTimer(globalDuration, displayAlarm);
         }
     });
 }
 
 function activateAlarm(alarmEstimateSeconds) {
-    if(alarmStatus == false)
-        $(".alarm_span").toggleClass("red");
+    var alarmSpan = document.querySelector('.alarm_span');
+    alarmSpan.id="red";
     document.getElementById('player').play();
     document.getElementById("button_alarm_off").hidden = false;
     globalDuration = alarmEstimateSeconds;
@@ -54,13 +58,20 @@ function activateAlarm(alarmEstimateSeconds) {
 }
 
 function deactivateAlarm() {
+    var alarmSpan = document.querySelector('.alarm_span');
+    alarmSpan.id="green";
     if(alarmStatus == true) {
-        $(".alarm_span").toggleClass("red");
         document.getElementById('player').pause();
         document.getElementById("button_alarm_off").hidden = true;
         globalDuration = 30;
         alarmStatus = false;
     }
+}
+
+function serverTimeout() {
+    var alarmSpan = document.querySelector('.alarm_span');
+    alarmSpan.id="orange";
+    globalDuration = 30;
 }
 
 function stopMusic() {
