@@ -70,7 +70,7 @@ function deactivateAlarm() {
 
 function serverTimeout() {
     var alarmSpan = document.querySelector('.alarm_span');
-    alarmSpan.id="orange";
+    alarmSpan.id="grey";
     globalDuration = 30;
 }
 
