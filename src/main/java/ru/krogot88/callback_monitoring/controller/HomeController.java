@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -16,6 +17,9 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 public class HomeController {
@@ -43,7 +47,13 @@ public class HomeController {
     }
 
     @GetMapping(value = "/")
-    public String getIndex() {
+    public String getIndex(Model model) {
+        Map<Integer,Integer> map = new HashMap<>();
+        List<Integer> list = monitorService.getThresholdList();
+        for(int i = 0; i < list.size();i++) {
+            map.put(i,list.get(i));
+        }
+        model.addAttribute("thresholdList",map);
         return "index";
     }
 

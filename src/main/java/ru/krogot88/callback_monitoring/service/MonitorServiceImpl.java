@@ -6,6 +6,11 @@ import ru.krogot88.callback_monitoring.model.Alarm;
 import ru.krogot88.callback_monitoring.model.Call;
 import ru.krogot88.callback_monitoring.model.Monitor;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class MonitorServiceImpl implements MonitorService {
 
@@ -21,5 +26,11 @@ public class MonitorServiceImpl implements MonitorService {
     @Override
     public Alarm getAlarm() {
         return monitor.getAlarm();
+    }
+
+    @Override
+    public List<Integer> getThresholdList() {
+        List<Integer> list = Arrays.stream(monitor.getCallsThresholdArray()).boxed().collect(Collectors.toList());
+        return list;
     }
 }

@@ -91,4 +91,12 @@ public class Monitor {
         }
         return result;
     }
+
+    public int[] getCallsThresholdArray() {
+        return callsThresholdArray;
+    }
+
+    public void setCallsThresholdArray(int[] callsThresholdArray) {
+        this.callsThresholdArray = callsThresholdArray;
+    }
 }
