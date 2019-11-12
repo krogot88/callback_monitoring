@@ -7,8 +7,10 @@ import org.springframework.stereotype.Component;
 import ru.krogot88.callback_monitoring.util.LimitedQueue;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -45,16 +47,17 @@ public class Monitor {
         LocalDateTime now = limitedQueue.getLast().getLocalDateTime();
         LocalDateTime start = now.minusMinutes(minutesBackward);
         int currentCallsThreshold = callsThresholdArray[now.getHour()];
-        int callsInPeriod = 0;
+        Set<String> callsInPeriod = new HashSet();
 
         Iterator<Call> it = limitedQueue.descendingIterator();
-        while(it.hasNext() && start.compareTo(it.next().getLocalDateTime()) < 0 && callsInPeriod < currentCallsThreshold) {
-            callsInPeriod++;
+        Call temp;
+        while(it.hasNext() && start.compareTo((temp = it.next()).getLocalDateTime()) < 0) {
+            callsInPeriod.add(temp.getaNumber());
         }
 
-        System.out.println("Threshold: " + currentCallsThreshold + "; calls last: " + callsInPeriod);
+        System.out.println("Threshold: " + currentCallsThreshold + "; calls last: " + callsInPeriod.size());
 
-        if (callsInPeriod >= currentCallsThreshold) {
+        if (callsInPeriod.size() >= currentCallsThreshold) {
             activateAlarm(now);
         }
     }
